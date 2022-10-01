@@ -1,13 +1,33 @@
 import type { NextPage } from "next";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import Button from "../components/button";
 import Input from "../components/input";
-import { cls } from "../libs/utils";
+import UseMutate from "../libs/client/useMutate";
+import { cls } from "../libs/client/utils";
+
+interface LoginInterface {
+  email: string;
+  phone: string;
+}
 
 const Enter: NextPage = () => {
+  const [enter, { loading, data, error }] = UseMutate("/api/user/enter");
+  const [sendingRequest, setSendingRequest] = useState(false);
+  const { register, handleSubmit, reset } = useForm<LoginInterface>();
   const [method, setMethod] = useState<"email" | "phone">("email");
-  const onEmailClick = () => setMethod("email");
-  const onPhoneClick = () => setMethod("phone");
+  const onEmailClick = () => {
+    reset();
+    setMethod("email");
+  };
+  const onPhoneClick = () => {
+    reset();
+    setMethod("phone");
+  };
+  const onVaild = (validForm: LoginInterface) => {
+    enter(validForm);
+  };
+  console.log(loading, data, error);
   return (
     <div className="mt-16 px-4">
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
@@ -39,22 +59,44 @@ const Enter: NextPage = () => {
             </button>
           </div>
         </div>
-        <form className="flex flex-col mt-8 space-y-4">
+        <form
+          onSubmit={handleSubmit(onVaild)}
+          className="flex flex-col mt-8 space-y-4"
+        >
           {method === "email" ? (
-            <Input name="email" label="Email address" type="email" required />
+            <Input
+              register={register("email", {
+                required: "you cannot access without this infomation",
+              })}
+              name="email"
+              label="Email address"
+              type="email"
+            />
           ) : null}
           {method === "phone" ? (
             <Input
+              register={register("phone", {
+                required: "you cannot access without this infomation",
+              })}
               name="phone"
               label="Phone number"
               type="number"
               kind="phone"
-              required
             />
           ) : null}
-          {method === "email" ? <Button text={"Get login link"} /> : null}
+          {method === "email" ? (
+            <Button
+              text={sendingRequest ? "Sending Login Request" : "Get login link"}
+            />
+          ) : null}
           {method === "phone" ? (
-            <Button text={"Get one-time password"} />
+            <Button
+              text={
+                sendingRequest
+                  ? "Sending Login Requset"
+                  : "Get one-time password"
+              }
+            />
           ) : null}
         </form>
 
