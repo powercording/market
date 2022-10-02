@@ -1,10 +1,10 @@
 import type { NextPage } from "next";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import Button from "../components/button";
-import Input from "../components/input";
-import UseMutate from "../libs/client/useMutate";
-import { cls } from "../libs/client/utils";
+import Button from "@components/button";
+import Input from "@components/input";
+import UseMutate from "@libs/client/useMutate";
+import { cls } from "@libs/client/utils";
 
 interface LoginInterface {
   email: string;
@@ -48,7 +48,7 @@ const Enter: NextPage = () => {
             </button>
             <button
               className={cls(
-                "pb-4 font-medium text-sm border-b-2",
+                "pb-4 font-medium text-sm border-b-2",  
                 method === "phone"
                   ? " border-orange-500 text-orange-400"
                   : "border-transparent hover:text-gray-400 text-gray-500"
