@@ -23,8 +23,8 @@ export default function UseMutate(
     })
       .then((response) => response.json().catch(() => {}))
       .then((json) => setState((prev) => ({ ...prev, data: json })))
-      .catch((error) => setState((prev) => ({ ...prev, error: error })))
-      .finally(() => setState((prev) => ({ ...prev, loading: false })));
+      .then(() => setState((prev) => ({ ...prev, loading: false })))
+      .catch((error) => setState((prev) => ({ ...prev, error: error })));
   }
 
   return [mutation, { ...state }];

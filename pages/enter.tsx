@@ -13,7 +13,6 @@ interface LoginInterface {
 
 const Enter: NextPage = () => {
   const [enter, { loading, data, error }] = UseMutate("/api/user/enter");
-  const [sendingRequest, setSendingRequest] = useState(false);
   const { register, handleSubmit, reset } = useForm<LoginInterface>();
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
@@ -48,7 +47,7 @@ const Enter: NextPage = () => {
             </button>
             <button
               className={cls(
-                "pb-4 font-medium text-sm border-b-2",  
+                "pb-4 font-medium text-sm border-b-2",
                 method === "phone"
                   ? " border-orange-500 text-orange-400"
                   : "border-transparent hover:text-gray-400 text-gray-500"
@@ -86,16 +85,12 @@ const Enter: NextPage = () => {
           ) : null}
           {method === "email" ? (
             <Button
-              text={sendingRequest ? "Sending Login Request" : "Get login link"}
+              text={loading ? "Sending Login Request" : "Get login link"}
             />
           ) : null}
           {method === "phone" ? (
             <Button
-              text={
-                sendingRequest
-                  ? "Sending Login Requset"
-                  : "Get one-time password"
-              }
+              text={loading ? "Sending Login Requset" : "Get one-time password"}
             />
           ) : null}
         </form>
