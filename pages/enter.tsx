@@ -26,7 +26,7 @@ const Enter: NextPage = () => {
   const onVaild = (validForm: LoginInterface) => {
     enter(validForm);
   };
-  console.log(loading, data, error);
+  console.log(data);
   return (
     <div className="mt-16 px-4">
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>

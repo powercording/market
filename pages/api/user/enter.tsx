@@ -2,6 +2,7 @@ import client from "@libs/server/client";
 import twilio from "twilio";
 import withHandler, { ResponseType } from "@libs/server/withHandler";
 import { NextApiRequest, NextApiResponse } from "next";
+import smtpTransport from "@libs/server/email";
 
 const twilioClient = twilio(
   process.env.TWILIO_SID,
@@ -13,20 +14,10 @@ async function handler(
   res: NextApiResponse<ResponseType>
 ) {
   const { email, phone } = req.body;
-  const user = phone ? { phone: +phone } : email ? email : null;
+  const user = phone ? { phone: +phone } : email ? { email: "" + email } : null;
+  console.log("user:", user);
   if (!user) return res.status(400).json({ ok: false });
   const payload = Math.floor(100000 + Math.random() * 900000) + "";
-
-  if (phone) {
-    const message = await twilioClient.messages.create({
-      messagingServiceSid: process.env.TWILIO_MESSAGE_TEST_SID,
-      to: process.env.TWILIO_PHONE!,
-      body: `Your Login Token is ${payload}`,
-    });
-    console.log("트윌로 메세지:", message);
-  }
-
-
 
   const token = await client.token.create({
     data: {
@@ -45,8 +36,37 @@ async function handler(
     },
   });
 
-  console.log("token : ", token);
+  if (phone) {
+    const message = await twilioClient.messages.create({
+      messagingServiceSid: process.env.TWILIO_MESSAGE_TEST_SID,
+      to: process.env.TWILIO_PHONE!,
+      body: `Your Login Token is ${payload}`,
+    });
+    console.log("트윌로 메세지:", message);
+  }
 
+  if (email) {
+    const mailOptions = {
+      from: process.env.MAIL_ID,
+      to: email,
+      subject: "SD blog testing email sended",
+      text: `your verificationn code is ${payload}`,
+    };
+
+    const result = await smtpTransport.sendMail(mailOptions, (err, res) => {
+      if (err) {
+        console.log(err);
+        return "mail has problem with code 402";
+      } else {
+        console.log(res);
+        return "sending mail seccessfully";
+      }
+    });
+    smtpTransport.close();
+    console.log(result);
+  }
+
+  console.log("token : ", token);
   return res.json({
     ok: true,
   });
