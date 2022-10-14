@@ -11,9 +11,24 @@ interface LoginInterface {
   phone: string;
 }
 
+interface TokenInterface {
+  token: number;
+}
+
+interface MutationResult {
+  ok: boolean;
+}
+
 const Enter: NextPage = () => {
-  const [enter, { loading, data, error }] = UseMutate("/api/user/enter");
+  const [enter, { loading, data, error }] =
+    UseMutate<MutationResult>("/api/user/enter");
+
+  const [confirmToken, { loading: tokenLoading, data: tokenDate }] =
+    UseMutate<MutationResult>("/api/user/confirm");
+
   const { register, handleSubmit, reset } = useForm<LoginInterface>();
+  const { register: tokenRegister, handleSubmit: tokenHnadleSubmit } =
+    useForm<TokenInterface>();
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
     reset();
@@ -26,74 +41,103 @@ const Enter: NextPage = () => {
   const onVaild = (validForm: LoginInterface) => {
     enter(validForm);
   };
-  console.log(data);
+  const onTokenValid = (tokenValidForm: TokenInterface) => {
+    if (tokenLoading) return;
+    confirmToken(tokenValidForm);
+  };
   return (
     <div className="mt-16 px-4">
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
       <div className="mt-12">
-        <div className="flex flex-col items-center">
-          <h5 className="text-sm text-gray-500 font-medium">Enter using:</h5>
-          <div className="grid  border-b  w-full mt-8 grid-cols-2 ">
-            <button
-              className={cls(
-                "pb-4 font-medium text-sm border-b-2",
-                method === "email"
-                  ? " border-orange-500 text-orange-400"
-                  : "border-transparent hover:text-gray-400 text-gray-500"
-              )}
-              onClick={onEmailClick}
-            >
-              Email
-            </button>
-            <button
-              className={cls(
-                "pb-4 font-medium text-sm border-b-2",
-                method === "phone"
-                  ? " border-orange-500 text-orange-400"
-                  : "border-transparent hover:text-gray-400 text-gray-500"
-              )}
-              onClick={onPhoneClick}
-            >
-              Phone
-            </button>
-          </div>
-        </div>
-        <form
-          onSubmit={handleSubmit(onVaild)}
-          className="flex flex-col mt-8 space-y-4"
-        >
-          {method === "email" ? (
+        {data?.ok ? (
+          <form
+            onSubmit={tokenHnadleSubmit(onTokenValid)}
+            className="flex flex-col mt-8 space-y-4"
+          >
             <Input
-              register={register("email", {
+              register={tokenRegister("token", {
                 required: "you cannot access without this infomation",
               })}
-              name="email"
-              label="Email address"
-              type="email"
-            />
-          ) : null}
-          {method === "phone" ? (
-            <Input
-              register={register("phone", {
-                required: "you cannot access without this infomation",
-              })}
-              name="phone"
-              label="Phone number"
+              name="token"
+              label="Confirmation Token"
               type="number"
-              kind="phone"
             />
-          ) : null}
-          {method === "email" ? (
+
             <Button
-              text={loading ? "Sending Login Request" : "Get login link"}
+              text={tokenLoading ? "Sending Login Requset" : "Confirm Token"}
             />
-          ) : null}
-          {method === "phone" ? (
-            <Button
-              text={loading ? "Sending Login Requset" : "Get one-time password"}
-            />
-          ) : null}
-        </form>
+          </form>
+        ) : (
+          <>
+            <div className="flex flex-col items-center">
+              <h5 className="text-sm text-gray-500 font-medium">
+                Enter using:
+              </h5>
+              <div className="grid  border-b  w-full mt-8 grid-cols-2 ">
+                <button
+                  className={cls(
+                    "pb-4 font-medium text-sm border-b-2",
+                    method === "email"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent hover:text-gray-400 text-gray-500"
+                  )}
+                  onClick={onEmailClick}
+                >
+                  Email
+                </button>
+                <button
+                  className={cls(
+                    "pb-4 font-medium text-sm border-b-2",
+                    method === "phone"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent hover:text-gray-400 text-gray-500"
+                  )}
+                  onClick={onPhoneClick}
+                >
+                  Phone
+                </button>
+              </div>
+            </div>
+            <form
+              onSubmit={handleSubmit(onVaild)}
+              className="flex flex-col mt-8 space-y-4"
+            >
+              {method === "email" ? (
+                <Input
+                  register={register("email", {
+                    required: "you cannot access without this infomation",
+                  })}
+                  name="email"
+                  label="Email address"
+                  type="email"
+                />
+              ) : null}
+              {method === "phone" ? (
+                <Input
+                  register={register("phone", {
+                    required: "you cannot access without this infomation",
+                  })}
+                  name="phone"
+                  label="Phone number"
+                  type="number"
+                  kind="phone"
+                />
+              ) : null}
+              {method === "email" ? (
+                <Button
+                  text={loading ? "Sending Login Request" : "Get login link"}
+                />
+              ) : null}
+              {method === "phone" ? (
+                <Button
+                  text={
+                    loading ? "Sending Login Requset" : "Get one-time password"
+                  }
+                />
+              ) : null}
+            </form>
+          </>
+        )}
 
         <div className="mt-8">
           <div className="relative">
