@@ -11,10 +11,16 @@
   "dependencies": {
     "@prisma/client": "^4.4.0",
     "@tailwindcss/forms": "^0.5.3",
+    "@types/crypto-js": "^4.1.1",
+    "@types/nodemailer": "^6.4.6",
+    "crypto-js": "^4.1.1",
+    "iron-session": "^6.2.1",
     "next": "12.3.0",
+    "nodemailer": "^6.8.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-hook-form": "^7.36.1"
+    "react-hook-form": "^7.36.1",
+    "twilio": "^3.82.1"
   },
   "devDependencies": {
     "@types/node": "18.7.18",

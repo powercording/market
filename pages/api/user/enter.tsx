@@ -1,31 +1,75 @@
 import client from "@libs/server/client";
-import withHandler from "@libs/server/withHandler";
+import twilio from "twilio";
+import withHandler, { ResponseType } from "@libs/server/withHandler";
 import { NextApiRequest, NextApiResponse } from "next";
-    
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+import smtpTransport from "@libs/server/email";
+
+const twilioClient = twilio(
+  process.env.TWILIO_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseType>
+) {
   const { email, phone } = req.body;
-  const payload = phone ? { phone: +phone } : { email };
+  const user = phone ? { phone: +phone } : email ? { email: "" + email } : null;
+  console.log("user:", user);
+  if (!user) return res.status(400).json({ ok: false });
+  const payload = Math.floor(100000 + Math.random() * 900000) + "";
 
   const token = await client.token.create({
     data: {
-      payload: "1234",
+      payload,
       user: {
         connectOrCreate: {
           where: {
-            ...payload,
+            ...user,
           },
           create: {
             name: "Anonymouse",
-            ...payload,
+            ...user,
           },
         },
       },
     },
   });
 
-  console.log("token : ", token);
+  if (phone) {
+    const message = await twilioClient.messages.create({
+      messagingServiceSid: process.env.TWILIO_MESSAGE_TEST_SID,
+      to: process.env.TWILIO_PHONE!,
+      body: `Your Login Token is ${payload}`,
+    });
+    console.log("트윌로 메세지:", message);
+  }
 
-  return res.status(200).end();
+  if (email) {
+    const mailOptions = {
+      from: process.env.MAIL_ID,
+      to: email,
+      subject: "SD blog testing email sended",
+      text: `your verificationn code is ${payload}`,
+    };
+
+    const result = await smtpTransport.sendMail(mailOptions, (err, res) => {
+      if (err) {
+        console.log(err);
+        return "mail has problem with code 402";
+      } else {
+        console.log(res);
+        return "sending mail seccessfully";
+      }
+    });
+    smtpTransport.close();
+    console.log(result);
+  }
+
+  console.log("token : ", token);
+  return res.json({
+    ok: true,
+  });
   // if (email) {
   //   user = await client.user.findUnique({
   //     where: {
