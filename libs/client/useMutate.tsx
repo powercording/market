@@ -1,5 +1,13 @@
 import { useState } from "react";
 
+type MutationState = {
+  loading: boolean;
+  data: undefined;
+  error: undefined;
+};
+
+type UseMutationReturn = [(data: any) => void, MutationState];
+
 export default function UseMutate(
   url: string
 ): [
@@ -13,7 +21,7 @@ export default function UseMutate(
   });
 
   function mutation(data: any) {
-    setState((prev) => ({ ...prev, loading: true }));
+    setState(prev => ({ ...prev, loading: true }));
     fetch(url, {
       method: "POST",
       headers: {
@@ -21,10 +29,10 @@ export default function UseMutate(
       },
       body: JSON.stringify(data),
     })
-      .then((response) => response.json().catch(() => {}))
-      .then((json) => setState((prev) => ({ ...prev, data: json })))
-      .catch((error) => setState((prev) => ({ ...prev, error: error })))
-      .finally(() => setState((prev) => ({ ...prev, loading: false })));
+      .then(response => response.json().catch(() => {}))
+      .then(json => setState(prev => ({ ...prev, data: json })))
+      .catch(error => setState(prev => ({ ...prev, error: error })))
+      .finally(() => setState(prev => ({ ...prev, loading: false })));
   }
 
   return [mutation, { ...state }];
